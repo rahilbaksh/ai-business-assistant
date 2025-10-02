@@ -8,7 +8,7 @@ class Evaluator:
         self.queries_processed = 0
         self.documents_processed = 0
         
-        # Sample test cases
+        
         self.sample_queries = [
             "What are the main sales trends?",
             "Are there any customer concerns?",
@@ -46,10 +46,9 @@ class Evaluator:
             answer = rag_engine.answer_question(query)
             response_time = time.time() - start_time
             
-            # Simple quality check - does the answer contain relevant info?
-            context = rag_engine.get_context(query)
-            has_context = len(context) > 50  # At least some context found
             
+            context = rag_engine.get_context(query)
+            has_context = len(context) > 50  
             results.append({
                 "query": query,
                 "response_time_seconds": round(response_time, 2),

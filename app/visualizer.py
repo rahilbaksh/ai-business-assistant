@@ -6,26 +6,24 @@ import base64
 
 def create_simple_chart(insights, document_text):
     """Create a simple visualization of insights"""
-    # Count business terms for a bar chart
+   
     business_terms = ['sales', 'customer', 'growth', 'market', 'profit', 'risk']
     counts = [document_text.lower().count(term) for term in business_terms]
     
-    # Create the chart
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
     
-    # Bar chart of term frequencies
+    
     bars = ax1.bar(business_terms, counts, color='skyblue')
     ax1.set_title('Business Term Frequency')
     ax1.set_ylabel('Number of Mentions')
     plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45)
     
-    # Add value labels on bars
+    
     for bar, count in zip(bars, counts):
         height = bar.get_height()
         ax1.text(bar.get_x() + bar.get_width()/2., height,
                 f'{count}', ha='center', va='bottom')
     
-    # Pie chart of insight types
     insight_types = {
         'Sales/Revenue': sum(1 for i in insights if any(word in i.lower() for word in ['sales', 'revenue', 'profit'])),
         'Customer': sum(1 for i in insights if 'customer' in i.lower()),
@@ -36,7 +34,7 @@ def create_simple_chart(insights, document_text):
     labels = [k for k, v in insight_types.items() if v > 0]
     sizes = [v for k, v in insight_types.items() if v > 0]
     
-    if sizes:  # Only create pie chart if we have data
+    if sizes:  
         ax2.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
         ax2.set_title('Insight Categories')
     else:
@@ -46,7 +44,7 @@ def create_simple_chart(insights, document_text):
     
     plt.tight_layout()
     
-    # Convert to base64 for Streamlit
+   
     buf = io.BytesIO()
     plt.savefig(buf, format='png', dpi=150, bbox_inches='tight')
     buf.seek(0)

@@ -8,7 +8,7 @@ from rag_engine import RAGEngine
 from visualizer import create_simple_chart
 from evaluator import Evaluator
 
-# Minimal CSS for better look
+
 st.markdown("""
 <style>
     .card {
@@ -46,12 +46,11 @@ def main():
         layout="wide"
     )
     
-    # Header with better spacing
     st.title("📊 Business Intelligence Assistant")
     st.markdown("---")
     st.write("Upload your business documents and get AI-powered insights")
     
-    # Initialize components
+   
     if 'doc_processor' not in st.session_state:
         st.session_state.doc_processor = DocumentProcessor()
         st.session_state.multimodal_processor = MultimodalProcessor()
@@ -61,7 +60,7 @@ def main():
         st.session_state.insights = []
         st.session_state.chat_history = []
     
-    # Sidebar
+  
     with st.sidebar:
         st.header("📁 Upload Files")
         
@@ -79,14 +78,14 @@ def main():
         if st.button("🚀 Process Files"):
             process_files(uploaded_docs, uploaded_image)
         
-        # Show processing status
+       
         if hasattr(st.session_state, 'processed_files'):
             st.sidebar.markdown("---")
             st.sidebar.subheader("📋 Processed Files")
             for file_info in st.session_state.processed_files:
                 st.sidebar.write(f"✅ {file_info}")
     
-    # Main tabs
+   
     tab1, tab2, tab3 = st.tabs(["💬 Chat", "📊 Insights", "🎯 Actions"])
     
     with tab1:
@@ -111,7 +110,7 @@ def process_files(uploaded_docs, uploaded_image):
                 tmp_file.write(doc.getvalue())
                 tmp_path = tmp_file.name
             
-            # Use the enhanced business document processor
+           
             chunks = st.session_state.doc_processor.process_business_document(tmp_path)
             
             if chunks:
@@ -121,7 +120,7 @@ def process_files(uploaded_docs, uploaded_image):
                 processed_files.append(f"{doc.name} ({len(chunks)} chunks)")
                 st.sidebar.success(f"✅ {doc.name}")
             else:
-                # Fallback to regular processing
+                
                 content = st.session_state.doc_processor.process_file(tmp_path)
                 if content:
                     st.session_state.rag_engine.add_document(content, doc.name)
@@ -154,7 +153,7 @@ def process_files(uploaded_docs, uploaded_image):
 def show_chat():
     st.markdown('<div class="card"><h3>💬 Ask Questions</h3><p>Get accurate answers about your business documents</p></div>', unsafe_allow_html=True)
     
-    # Suggested questions for business documents
+   
     st.subheader("💡 Suggested Questions")
     col1, col2, col3 = st.columns(3)
     
@@ -176,7 +175,7 @@ def show_chat():
         if st.button("Financial Performance"):
             st.session_state.question = "What was the financial performance in 2023?"
     
-    # Question input
+   
     question = st.text_input(
         "Enter your question:",
         key="question",
@@ -188,16 +187,16 @@ def show_chat():
             answer = st.session_state.rag_engine.answer_question(question)
             st.session_state.evaluator.log_query()
             
-            # Add to chat history
+           
             st.session_state.chat_history.append({
                 "question": question,
                 "answer": answer
             })
             
-            # Display answer in a nice box
+          
             st.markdown(f'<div class="answer-box"><h4>📋 Answer:</h4><p>{answer}</p></div>', unsafe_allow_html=True)
     
-    # Show chat history
+    
     if st.session_state.chat_history:
         st.markdown("---")
         st.subheader("📜 Chat History")
@@ -221,8 +220,7 @@ def show_insights():
                     st.success(f"🎉 Found {len(insights)} key insights:")
                     for i, insight in enumerate(insights, 1):
                         st.markdown(f"**{i}.** {insight}")
-                    
-                    # Try to create visualization
+                   
                     try:
                         chart = create_simple_chart(insights, st.session_state.all_text)
                         st.image(chart, use_column_width=True, caption="📈 Insights Visualization")
@@ -246,7 +244,7 @@ def show_actions():
                     for i, action in enumerate(actions, 1):
                         st.markdown(f"**{i}.** {action}")
                     
-                    # Add download option
+                    
                     action_text = "\n".join([f"{i}. {action}" for i, action in enumerate(actions, 1)])
                     st.download_button(
                         label="📥 Download Action Plan",

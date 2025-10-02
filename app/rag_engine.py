@@ -14,15 +14,15 @@ class RAGEngine:
         self.vector_store = None
         self.documents = []
 
-        # Load small LLM for proper answers - BUT DISABLE IT FOR NOW
+       
         try:
             self.llm = pipeline(
                 "text2text-generation",
-                model="google/flan-t5-small",   # lightweight LLM
+                model="google/flan-t5-small",   
                 max_length=300,
                 truncation=True
             )
-            self.llm_available = False  # DISABLED to prevent gibberish
+            self.llm_available = False  
             self.logger.info("✅ Flan-T5 Small loaded but DISABLED to prevent gibberish")
         except Exception as e:
             self.llm_available = False
@@ -91,40 +91,40 @@ class RAGEngine:
 
     def get_context(self, query):
         """Get context with better search strategy"""
-        # First try direct similarity search
+       
         relevant_docs = self.search(query, num_results=5)
         
-        # If that fails, try with expanded keywords for common business questions
+        
         if not relevant_docs or len(' '.join(relevant_docs)) < 100:
             expanded_query = self._expand_business_query(query)
             if expanded_query != query:
                 additional_docs = self.search(expanded_query, num_results=3)
                 relevant_docs.extend(additional_docs)
         
-        # Remove duplicates & prioritize longer, more relevant chunks
+        
         unique_docs = list(dict.fromkeys(relevant_docs))
-        unique_docs.sort(key=len, reverse=True)  # Prefer longer chunks
+        unique_docs.sort(key=len, reverse=True)  
         
         context = " ".join(unique_docs)
-        return context[:2000]  # Slightly increased context window
+        return context[:2000] 
 
     def _is_gibberish(self, text):
         """Check if the text looks like garbage output"""
         if len(text) < 10:
             return True
         
-        # Check for excessive special characters
+      
         special_chars = sum(1 for c in text if not c.isalnum() and not c.isspace() and c not in ['.', ',', '!', '?', ':', ';', '-', '$', '%'])
         special_char_ratio = special_chars / len(text)
-        if special_char_ratio > 0.2:  # More than 20% special chars
+        if special_char_ratio > 0.2: 
             return True
             
-        # Check for repetitive patterns
+       
         if any(pattern in text for pattern in ["++", "//", "&&", "(+", ")/", "*0", "*1", ".*"]):
             return True
             
-        # Check for random character sequences
-        if re.search(r'[A-Za-z][0-9][A-Za-z]', text):  # Patterns like "a1b"
+       
+        if re.search(r'[A-Za-z][0-9][A-Za-z]', text):  
             return True
             
         return False
@@ -134,28 +134,28 @@ class RAGEngine:
         question_lower = question.lower()
         sentences = re.split(r'[.!?]+', context)
         
-        # Score sentences based on relevance to question
+      
         scored_sentences = []
         
         for sentence in sentences:
-            if len(sentence.strip()) < 20:  # Skip very short sentences
+            if len(sentence.strip()) < 20:  
                 continue
                 
             score = 0
             sentence_lower = sentence.lower()
             
-            # Score based on question keywords
+           
             question_words = set(question_lower.split())
             for word in question_words:
                 if len(word) > 3 and word in sentence_lower:
                     score += 3
             
-            # Bonus for financial/business terms in financial questions
+           
             if any(term in question_lower for term in ['sales', 'revenue', 'growth', 'financial']):
                 if any(term in sentence_lower for term in ['billion', 'million', 'dollar', 'percent', 'growth', 'sales']):
                     score += 2
             
-            # Bonus for legal terms in legal questions
+            
             if any(term in question_lower for term in ['litigation', 'lawsuit', 'legal', 'talc', 'opioid']):
                 if any(term in sentence_lower for term in ['lawsuit', 'litigation', 'talc', 'opioid', 'legal']):
                     score += 2
@@ -163,12 +163,12 @@ class RAGEngine:
             if score > 0:
                 scored_sentences.append((score, sentence.strip()))
         
-        # Return the highest scored sentence
+        
         if scored_sentences:
             scored_sentences.sort(reverse=True, key=lambda x: x[0])
             return scored_sentences[0][1] + "."
         
-        # Fallback: return the first substantial sentence
+        
         for sentence in sentences:
             if len(sentence.strip()) > 30:
                 return sentence.strip() + "."
@@ -182,11 +182,11 @@ class RAGEngine:
         if not context or len(context.strip()) < 50:
             return "I couldn't find relevant information about this topic in your documents."
 
-        # SAFE MODE: Always use extraction, never the problematic LLM
+       
         try:
             answer = self._extract_best_answer(context, question)
             
-            # Final safety check
+           
             if self._is_gibberish(answer):
                 return "The document contains relevant information, but I cannot provide a clear answer at this time."
                 

@@ -12,9 +12,9 @@ class DocumentProcessor:
         self.logger = setup_logging()
         self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1200,  # Increased for better context
-            chunk_overlap=200,  # Increased overlap
-            separators=["\n\n", "\n", ". ", "? ", "! ", " ", ""]  # Better separators
+            chunk_size=1200,  
+            chunk_overlap=200,  
+            separators=["\n\n", "\n", ". ", "? ", "! ", " ", ""] 
         )
         
     def read_pdf(self, file_path):
@@ -26,7 +26,7 @@ class DocumentProcessor:
                 for page_num, page in enumerate(pdf_reader.pages):
                     page_text = page.extract_text()
                     if page_text:
-                        # Add page marker for context
+                        
                         text += f"\n--- PAGE {page_num + 1} ---\n{page_text}\n"
             
             self.logger.info(f"Read PDF with {len(pdf_reader.pages)} pages")
@@ -53,10 +53,10 @@ class DocumentProcessor:
         if not content:
             return None
         
-        # Use smarter chunking for business documents
+       
         chunks = self.text_splitter.split_text(content)
         
-        # Enhance chunks with metadata about their content type
+        
         enhanced_chunks = []
         for chunk in chunks:
             chunk_lower = chunk.lower()

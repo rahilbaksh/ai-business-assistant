@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Dict
 
-# Simple data models for our app
+
 class Document:
     def __init__(self, content: str, source: str = ""):
         self.content = content
